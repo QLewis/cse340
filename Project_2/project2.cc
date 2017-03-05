@@ -23,7 +23,13 @@ int main (int argc, char* argv[])
     task = atoi(argv[1]);
 
     // TODO: Read the input grammar at this point from standard input
-	cin >> 
+	//NOTE: "standard input" means you don't have to read from a file
+	//Read until you hit ##
+	string input;
+	do
+	{
+		cin >> input;
+	}while (input != "##");
     /*
        Hint: You can modify and use the lexer from previous project
        to read the input. Note that there are only 4 token types needed
@@ -38,22 +44,31 @@ int main (int argc, char* argv[])
         case 1:
             // TODO: perform task 1.
             // For each terminal and non-terminal, deternmine number of grammar rules in which it appears
-            break;
+        cout << "This is task 1\n";    
+	break;
 
         case 2:
             // TODO: perform task 2.
+            // Determine useless symbols and remove them
+            cout << "This is task 2\n";
             break;
 
         case 3:
             // TODO: perform task 3.
+            // Calculate FIRST sets
+            cout << "This is task 3\n";
             break;
 
         case 4:
             // TODO: perform task 4.
-            break;
+            // Calculate FOLLOW sets
+            cout << "This is task 4\n";    
+	break;
 
         case 5:
             // TODO: perform task 5.
+            // Determine if the grammar has a predictive parser
+            cout << "This is task 5\n";
             break;
 
         default:
