@@ -1,0 +1,26 @@
+REALNUM
+	• Check if first character is pdigit
+		○ If yes, check if next character is a digit
+			§ Keep checking until you hit a DOT
+				□ Check if first character after the dot is a digit
+					® Check if next character is digit* until end of input
+		○ Else check if first character is a 0
+			§ If yes, next character must be a DOT
+				Keep checking for digit* until you hit pdigit
+				Keep checking digit* until end of input
+
+
+If first character is digit
+Else if first character is 0
+	If next character is DOT
+		do some shit
+	else
+		if end of input
+			tokentype == NUM
+		if not end of input
+			tokentype == ERROR
+
+
+
+if input.GetToken(input.getChar) == DOT
+
