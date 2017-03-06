@@ -10,8 +10,9 @@ int main (int argc, char* argv[])
 {
     int task;
     string input;
-    //char delimiter('#');
+    string delimiter = "#";
     vector<string> grammar;
+    string token;
 
     if (argc < 2)
     {
@@ -30,16 +31,25 @@ int main (int argc, char* argv[])
 	//NOTE: "standard input" means you don't have to read from a file
 	//Read until you hit ##
 	
-	/*while (getline(cin, input, delimiter) && (input != "##"))
+	size_t pos = 0;
+
+
+	getline(cin, input);
+	
+	while (input != "##")
 	{
-		grammar.push_back(input);
-		getline(cin, input, delimiter);
-	}*/
-	do
-	{
-		getline(cin, input);
-		grammar.push_back(input);
-	} while(input != "##");
+		while ((pos = input.find(delimiter)) != string::npos)
+		{
+			token = input.substr(0, pos);
+			if (token == "##")
+			{
+				break;
+			}
+			grammar.push_back(token);
+			input.erase(0, pos + delimiter.length());
+		}
+		getline(cin,input);	
+	}
     /*
        Hint: You can modify and use the lexer from previous project
        to read the input. Note that there are only 4 token types needed
@@ -54,13 +64,16 @@ int main (int argc, char* argv[])
         case 1:
             // TODO: perform task 1.
             // For each terminal and non-terminal, deternmine number of grammar rules in which it appears
-        cout << "This is task 1\n";
-	//cout << "The input is: " << input << "\n"; 
+        //The first line is terminals,
+        //The second line is non-terminals
+	cout << "This is task 1\n";
 	cout << "This is the grammar:\n";
-	for (vector<string>::const_iterator i = grammar.begin(); i != grammar.end(); ++i)
+	for (int i = 0; i < grammar.size(); i++)
 	{
-		cout << *i << "\n";
+		cout << grammar.at(i) << "\n";
 	}
+	cout << "The terminals are: " << grammar.at(0) << "\n";
+	cout << "The non-terminals are: " << grammar.at(1) << "\n";
 	break;
 
         case 2:
