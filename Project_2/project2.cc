@@ -3,11 +3,15 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <vector> //added by student
 using namespace std;
 
 int main (int argc, char* argv[])
 {
     int task;
+    string input;
+    //char delimiter('#');
+    vector<string> grammar;
 
     if (argc < 2)
     {
@@ -25,11 +29,17 @@ int main (int argc, char* argv[])
     // TODO: Read the input grammar at this point from standard input
 	//NOTE: "standard input" means you don't have to read from a file
 	//Read until you hit ##
-	string input;
+	
+	/*while (getline(cin, input, delimiter) && (input != "##"))
+	{
+		grammar.push_back(input);
+		getline(cin, input, delimiter);
+	}*/
 	do
 	{
-		cin >> input;
-	}while (input != "##");
+		getline(cin, input);
+		grammar.push_back(input);
+	} while(input != "##");
     /*
        Hint: You can modify and use the lexer from previous project
        to read the input. Note that there are only 4 token types needed
@@ -44,7 +54,13 @@ int main (int argc, char* argv[])
         case 1:
             // TODO: perform task 1.
             // For each terminal and non-terminal, deternmine number of grammar rules in which it appears
-        cout << "This is task 1\n";    
+        cout << "This is task 1\n";
+	//cout << "The input is: " << input << "\n"; 
+	cout << "This is the grammar:\n";
+	for (vector<string>::const_iterator i = grammar.begin(); i != grammar.end(); ++i)
+	{
+		cout << *i << "\n";
+	}
 	break;
 
         case 2:
