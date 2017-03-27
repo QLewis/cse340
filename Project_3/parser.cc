@@ -351,7 +351,7 @@ void Parser::parse_expr()
     {
 	//expr --> term PLUS expr
 	expect(PLUS);
-	 parse_expr();
+	parse_expr();
     }
     else if (t.token_type == RPAREN || t.token_type == SEMICOLON)
     {
@@ -389,10 +389,9 @@ void Parser::parse_term()
 
 void Parser::parse_factor()
 {
-    Token t = peek();
+    Token t = lexer.GetToken();
     if (t.token_type == LPAREN) //factor --> LPAREN expr RPAREN
     {
-	expect(LPAREN);
 	parse_expr();
 	expect(RPAREN);
     } else if (t.token_type == NUM) //factor --> NUM
