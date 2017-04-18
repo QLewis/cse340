@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include <vector> //added by student
+#include <sstream> //added by student
 using namespace std;
 
 int main (int argc, char* argv[])
@@ -13,7 +14,9 @@ int main (int argc, char* argv[])
     string delimiter = "#";
     vector<string> grammar;
     string token;
-
+    string terminals;
+    string terminal;
+    //istringstream iss;
     if (argc < 2)
     {
         cout << "Error: missing argument\n";
@@ -66,15 +69,26 @@ int main (int argc, char* argv[])
             // For each terminal and non-terminal, deternmine number of grammar rules in which it appears
         //The first line is terminals,
         //The second line is non-terminals
-	cout << "This is task 1\n";
-	cout << "This is the grammar:\n";
-	for (int i = 0; i < grammar.size(); i++)
-	{
-		cout << grammar.at(i) << "\n";
-	}
-	cout << "The terminals are: " << grammar.at(0) << "\n";
-	cout << "The non-terminals are: " << grammar.at(1) << "\n";
-	break;
+		cout << "This is task 1\n";
+		cout << "This is the grammar:\n";
+		for (int i = 0; i < grammar.size(); i++)
+		{
+			cout << grammar.at(i) << "\n";
+		}
+		cout << "\n The terminals are: " << grammar.at(0) << endl;	
+		cout << "The non-terminals are: " << grammar.at(1) << "\n";
+		cout << "\n";
+
+		terminals = grammar.at(0);
+		istringstream iss(terminals);
+		while(iss)
+		{
+			//string terminal;
+			iss >> terminal;
+			cout << terminal << endl;
+		}
+
+		break;
 
         case 2:
             // TODO: perform task 2.
