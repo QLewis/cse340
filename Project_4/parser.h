@@ -10,9 +10,9 @@ class Parser{
   private:
 	 LexicalAnalyzer lexer;
 
-	void syntax_error(); //TODO put in parser.cc
-	Token expect(TokenType expected_type); //TODO put in parcer.cc
-	Token peek(); //TODO put in parser.cc
+	void syntax_error();
+	Token expect(TokenType expected_type);
+	Token peek();
 
 	void parse_program();
 	void parse_var_section();
