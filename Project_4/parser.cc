@@ -72,13 +72,18 @@ void Parser::parse_body()
 
 void Parser::parse_stmt_list()
 {
+	
 	parse_stmt();
 	Token t = peek();
-	if (t.token_type == LBRACE) //stmt --> stmt stmt_list
+	if (t.token_type == RBRACE) //stmt_list --> stmt
 	{
-		parse_stmt_list();
+		//all good
 	}
-	else if (t.token_type == RPAREN || t.token_type == ID) { } //stmt__list --> stmt 
+	else if (t.token_type == ID || t.token_type == print || t.token_type == WHILE || t.token_type == IF || t.token_type == SWITCH || t.token_type == FOR)
+	{
+		//stmt_list --> stmt stmt_list
+		parse_stmt_list();
+	 }
 	else
 	{
 		syntax_error();
