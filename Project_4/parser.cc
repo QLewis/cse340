@@ -120,12 +120,26 @@ void Parser::parse_stmt()
 
 void Parser::parse_assign_stmt()
 {
-	//assign_stmt --> ID EQUAL primary SEMICOLON
-	//assign_stmt --> ID EQUAL expr SEMICOLON
 	expect(ID);
 	expect(EQUAL);
-	Token t = peek();
-	//TODO: GET HELP	
+	Token t1 = lexer.GetToken(); //this will be primary, no matter what
+	Token t2 = peek(); // get whatever is after primary
+	if (t2.token_type == SEMICOLON) //assign_stmt --> ID EQUAL primary SEMICOLON
+	{
+		lexer.UngetToken(t1);
+		parse_primary();
+		expect(SEMICOLON);
+	}
+	else if (t2.token_type == PLUS || t2.token_type == MINUS || t2.token_type == MULT || t2.token_type == DIV) //assign_stmt --> ID EQUAL expr SEMICOLON
+	{
+		lexer.UngetToken(t1);
+		/*parse_primary();
+		parse_op();
+		parse_primary();*/
+		parse_expr();
+		expect(SEMICOLON);
+		
+	}
 }
 
 void Parser::parse_expr()
