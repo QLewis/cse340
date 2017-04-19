@@ -85,7 +85,7 @@ void Parser::parse_stmt_list()
 	}	
 }
 
-void Parser:: parse_stmt()
+void Parser::parse_stmt()
 {
 	Token t = peek();
 	if (t.token_type == ID) //stmt --> assign_stmt
@@ -118,61 +118,187 @@ void Parser:: parse_stmt()
 	}
 }
 
-void Parser:: parse_assign_stmt()
+void Parser::parse_assign_stmt()
 {
+	//assign_stmt --> ID EQUAL primary SEMICOLON
+	//assign_stmt --> ID EQUAL expr SEMICOLON
+	expect(ID);
+	expect(EQUAL);
+	Token t = peek();
+	//TODO: GET HELP	
 }
 
-void Parser:: parse_expr()
+void Parser::parse_expr()
 {
+	//expr --> primary op primary
+	parse_primary();
+	parse_op();
+	parse_primary();
 }
 
-void Parser:: parse_primary()
+void Parser::parse_primary()
 {
+	Token t = lexer.GetToken();
+	if (t.token_type == ID || t.token_type == NUM)
+	{
+		//primary --> ID
+		//primary --> NUM
+	}
+	else
+	{
+		syntax_error();
+	}
 }
 
-void Parser:: parse_op()
+void Parser::parse_op()
 {
+	Token t = lexer.GetToken();
+	if (t.token_type == PLUS)
+	{
+		//op --> PLUS
+	}
+	else if (t.token_type == MINUS)
+	{
+		//op --> MINUS
+	}
+	else if (t.token_type == MULT)
+	{
+		//op --> MULT
+	}
+	else if (t.token_type == DIV)
+	{
+		//op --> DIV
+	}
+	else
+	{
+		syntax_error();
+	}
 }
 
-void Parser:: parse_print_stmt()
+void Parser::parse_print_stmt()
 {
+	//print_stmt --> print ID SEMICOLON
+	expect(print);
+	expect(ID);
+	expect(SEMICOLON);
 }
 
-void Parser:: parse_while_stmt()
+void Parser::parse_while_stmt()
 {
+	//while_stmt --> WHILE condition body
+	expect(WHILE);
+	parse_condition();
+	parse_body();
 }
 
-void Parser:: parse_if_stmt()
+void Parser::parse_if_stmt()
 {
+	expect(IF);
+	parse_condition();
+	parse_body();
 }
 
-void Parser:: parse_condition()
+void Parser::parse_condition()
 {
+	parse_primary();
+	parse_relop();
+	parse_primary();
 }
 
-void Parser:: parse_relop()
+void Parser::parse_relop()
 {
+	Token t = lexer.GetToken();
+	if (t.token_type == GREATER)
+	{
+		//relop --> GREATER
+	}
+	else if (t.token_type == LESS)
+	{
+		//relop --> LESS
+	}
+	else if (t.token_type == NOTEQUAL)
+	{
+		//relop --> NOTEQUAL
+	}
+	else
+	{
+		syntax_error();
+	}
 }
 
-void Parser:: parse_switch_stmt()
+void Parser::parse_switch_stmt()
 {
+	//switch_stmt --> SWITCH ID LBRACE case_list RBRACE
+	//switch_stmt --> SWITCH  ID LBRACE case_list default_case RBRACE
+	expect(SWITCH);
+	expcect(ID);
+	expect(LBRACE);
+	parse_case_list();
+	Token t = peek();
+	if (t.token_type == DEFAULT)
+	{
+		parse_default_case();
+		expect(RBRACE);
+	}
+	else if (t.token_type == RBRACE)
+	{
+		expect(RBRACE);
+	}
+	else
+	{
+		syntax_error();
+	}
 }
 
 void Parser:: parse_for_stmt()
 {
+	//for_stmt --> FOR LPAREN assign_stmt condition SEMICOLON assign_stmt RPAREN body
+	expect(FOR);
+	expect(LPAREN);
+	parse_assign_stmt();
+	parse_condition();
+	expect(SEMICOLON);
+	parse_assign_stmt();
+	expect(RPAREN);
+	parse_body();
 }
 
 
 void Parser:: parse_case_list()
 {
+	//case_list --> case
+	//case_list --> case case_list
+	parse_case();
+	Token t = peek();
+	if (t.token_type == CASE)
+	{
+		parse_case_list();
+	}
+	else if (t.token_type == RBRACE || t.token_type == DEFAULT)
+	{
+		//case_list --> case
+	}
+	else
+	{
+		syntax_error();
+	}
 }
 
 void Parser:: parse_case()
 {
+	//case --> CASE NUM COLON body
+	expect(CASE);
+	expect(NUM);
+	expect(COLON);
+	parse_body();
 }
 
 void Parser:: parse_default_case()
 {
+	//default_case --> DEFAULT COLON body
+	expect(DEFAULT);
+	expect(COLON);
+	parse_body();
 }
 
 
