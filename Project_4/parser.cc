@@ -70,12 +70,29 @@ void Parser::parse_body()
 	expect(RBRACE);
 }
 
-void Parser::parse_stmt_list()
+struct StatementNode*  Parser::parse_stmt_list()
 {
-	
-	parse_stmt();
+	struct StatementNode* st; //statement
+	struct StatementNode* stl; //statement list
+
+	st = parse_stmt();
+
 	Token t = peek();
-	if (t.token_type == RBRACE) //stmt_list --> stmt
+	if (t.token_type == ID || t.token_type == print || t._token_type == WHILE || t.token_type == IF || t.token_type == SWITCH || t.token_type == FOR)
+	{
+		stl = parse_stmt_list();
+		//TODO: append stl to st
+		return st;
+	}
+	else if (t.token_type == RBRACE)
+	{
+		return st;
+	}
+	else
+	{
+		syntax_error();
+	}
+	/*if (t.token_type == RBRACE) //stmt_list --> stmt
 	{
 		//all good
 	}
@@ -87,7 +104,7 @@ void Parser::parse_stmt_list()
 	else
 	{
 		syntax_error();
-	}	
+	}*/	
 }
 
 void Parser::parse_stmt()
