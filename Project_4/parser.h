@@ -14,26 +14,26 @@ class Parser{
 	Token expect(TokenType expected_type);
 	Token peek();
 
-	void parse_program();
-	void parse_var_section();
-	void parse_id_list();
-	void parse_body();
-	void parse_stmt_list();
-	void parse_stmt();
-	void parse_assign_stmt();
-	void parse_expr();
-	void parse_primary();
-	void parse_op();
-	void parse_print_stmt();
-	void parse_while_stmt();
-	void parse_if_stmt();
-	void parse_condition();
-	void parse_relop();
-	void parse_switch_stmt();
-	void parse_for_stmt();
-	void parse_case_list();
-	void parse_case();
-	void parse_default_case();
+	struct StatementNode* parse_program();
+	struct StatementNode* parse_var_section();
+	struct StatementNode* parse_id_list();
+	struct StatementNode* parse_body();
+	struct StatementNode* parse_stmt_list();
+	struct StatementNode* parse_stmt();
+	struct StatementNode* parse_assign_stmt();
+	struct StatementNode* parse_expr();
+	struct StatementNode* parse_primary();
+	struct StatementNode* parse_op();
+	struct StatementNode* parse_print_stmt();
+	struct StatementNode* parse_while_stmt();
+	struct StatementNode* parse_if_stmt();
+	struct StatementNode* parse_condition();
+	struct StatementNode* parse_relop();
+	struct StatementNode* parse_switch_stmt();
+	struct StatementNode* parse_for_stmt();
+	struct StatementNode* parse_case_list();
+	struct StatementNode* parse_case();
+	struct StatementNode* parse_default_case();
 
  public:
 	void ParseInput();	

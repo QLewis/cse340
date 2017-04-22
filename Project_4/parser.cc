@@ -12,7 +12,7 @@ void Parser::syntax_error()
 	exit(1);
 }
 
-void Parser::expect(TokenType expected_type)
+Token Parser::expect(TokenType expected_type)
 {
 	Token t = lexer.GetToken();
 	if (t.token_type != expected_type)
@@ -22,7 +22,7 @@ void Parser::expect(TokenType expected_type)
 	return t;
 }
 
-void Parser::peek()
+Token Parser::peek()
 {
 	Token t = lexer.GetToken();
 	lexer.UngetToken(t);
@@ -62,15 +62,26 @@ void Parser::parse_id_list()
 	
 }
 
-void Parser::parse_body()
+struct StatementNode* Parser::parse_body()
+{
+	//body --> LBRACE stmt_list RBRACE
+	struct StatementNode * stl;
+	
+	expect(LBRACE);
+	stl = parse_stmt_list();
+	expect(RBRACE);
+
+	return stl;
+}
+/*void Parser::parse_body()
 {
 	//body --> LBRACE stmt_list RBRACE
 	expect(LBRACE);
 	parse_stmt_list();
 	expect(RBRACE);
-}
+}*/
 
-struct StatementNode*  Parser::parse_stmt_list()
+struct StatementNode* Parser::parse_stmt_list()
 {
 	struct StatementNode* st; //statement
 	struct StatementNode* stl; //statement list
@@ -80,12 +91,14 @@ struct StatementNode*  Parser::parse_stmt_list()
 	Token t = peek();
 	if (t.token_type == ID || t.token_type == print || t._token_type == WHILE || t.token_type == IF || t.token_type == SWITCH || t.token_type == FOR)
 	{
+		//stmt_list --> stmt stmt_list
 		stl = parse_stmt_list();
-		//TODO: append stl to st
+		st->next = stl;
 		return st;
 	}
 	else if (t.token_type == RBRACE)
 	{
+		//stmt_list --> stmt
 		return st;
 	}
 	else
