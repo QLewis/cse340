@@ -31,21 +31,21 @@ Token Parser::peek()
 
 //Parsing
 
-void Parser::parse_program()
+struct StatementNode* Parser::parse_program()
 {
 	//program --> var_section body
 	parse_var_section();
 	parse_body();
 }
 
-void Parser::parse_var_section()
+struct StatementNode* Parser::parse_var_section()
 {
 	//id_list SEMICOLON
 	parse_id_list();
 	expect(SEMICOLON);
 }
 
-void Parser::parse_id_list()
+struct StatementNode* Parser::parse_id_list()
 {
 	expect(ID);
 	Token t = peek();
@@ -73,13 +73,6 @@ struct StatementNode* Parser::parse_body()
 
 	return stl;
 }
-/*void Parser::parse_body()
-{
-	//body --> LBRACE stmt_list RBRACE
-	expect(LBRACE);
-	parse_stmt_list();
-	expect(RBRACE);
-}*/
 
 struct StatementNode* Parser::parse_stmt_list()
 {
@@ -105,22 +98,9 @@ struct StatementNode* Parser::parse_stmt_list()
 	{
 		syntax_error();
 	}
-	/*if (t.token_type == RBRACE) //stmt_list --> stmt
-	{
-		//all good
-	}
-	else if (t.token_type == ID || t.token_type == print || t.token_type == WHILE || t.token_type == IF || t.token_type == SWITCH || t.token_type == FOR)
-	{
-		//stmt_list --> stmt stmt_list
-		parse_stmt_list();
-	 }
-	else
-	{
-		syntax_error();
-	}*/	
 }
 
-void Parser::parse_stmt()
+struct StatementNode* Parser::parse_stmt()
 {
 	Token t = peek();
 	if (t.token_type == ID) //stmt --> assign_stmt
@@ -153,7 +133,7 @@ void Parser::parse_stmt()
 	}
 }
 
-void Parser::parse_assign_stmt()
+struct StatementNode* Parser::parse_assign_stmt()
 {
 	expect(ID);
 	expect(EQUAL);
@@ -177,7 +157,7 @@ void Parser::parse_assign_stmt()
 	}
 }
 
-void Parser::parse_expr()
+struct StatementNode* Parser::parse_expr()
 {
 	//expr --> primary op primary
 	parse_primary();
@@ -185,7 +165,7 @@ void Parser::parse_expr()
 	parse_primary();
 }
 
-void Parser::parse_primary()
+struct StatementNode* Parser::parse_primary()
 {
 	Token t = lexer.GetToken();
 	if (t.token_type == ID || t.token_type == NUM)
@@ -199,7 +179,7 @@ void Parser::parse_primary()
 	}
 }
 
-void Parser::parse_op()
+struct StatementNode* Parser::parse_op()
 {
 	Token t = lexer.GetToken();
 	if (t.token_type == PLUS)
@@ -224,7 +204,7 @@ void Parser::parse_op()
 	}
 }
 
-void Parser::parse_print_stmt()
+struct StatementNode* Parser::parse_print_stmt()
 {
 	//print_stmt --> print ID SEMICOLON
 	expect(print);
@@ -232,7 +212,7 @@ void Parser::parse_print_stmt()
 	expect(SEMICOLON);
 }
 
-void Parser::parse_while_stmt()
+struct StatementNode* Parser::parse_while_stmt()
 {
 	//while_stmt --> WHILE condition body
 	expect(WHILE);
@@ -240,21 +220,21 @@ void Parser::parse_while_stmt()
 	parse_body();
 }
 
-void Parser::parse_if_stmt()
+struct StatementNode* Parser::parse_if_stmt()
 {
 	expect(IF);
 	parse_condition();
 	parse_body();
 }
 
-void Parser::parse_condition()
+struct StatementNode* Parser::parse_condition()
 {
 	parse_primary();
 	parse_relop();
 	parse_primary();
 }
 
-void Parser::parse_relop()
+struct StatementNode* Parser::parse_relop()
 {
 	Token t = lexer.GetToken();
 	if (t.token_type == GREATER)
@@ -275,7 +255,7 @@ void Parser::parse_relop()
 	}
 }
 
-void Parser::parse_switch_stmt()
+struct StatementNode* Parser::parse_switch_stmt()
 {
 	//switch_stmt --> SWITCH ID LBRACE case_list RBRACE
 	//switch_stmt --> SWITCH  ID LBRACE case_list default_case RBRACE
@@ -299,7 +279,7 @@ void Parser::parse_switch_stmt()
 	}
 }
 
-void Parser:: parse_for_stmt()
+struct StatementNode* Parser:: parse_for_stmt()
 {
 	//for_stmt --> FOR LPAREN assign_stmt condition SEMICOLON assign_stmt RPAREN body
 	expect(FOR);
@@ -313,7 +293,7 @@ void Parser:: parse_for_stmt()
 }
 
 
-void Parser:: parse_case_list()
+struct StatementNode* Parser:: parse_case_list()
 {
 	//case_list --> case
 	//case_list --> case case_list
@@ -333,7 +313,7 @@ void Parser:: parse_case_list()
 	}
 }
 
-void Parser:: parse_case()
+struct StatementNode* Parser:: parse_case()
 {
 	//case --> CASE NUM COLON body
 	expect(CASE);
@@ -342,7 +322,7 @@ void Parser:: parse_case()
 	parse_body();
 }
 
-void Parser:: parse_default_case()
+struct StatementNode* Parser:: parse_default_case()
 {
 	//default_case --> DEFAULT COLON body
 	expect(DEFAULT);
@@ -350,6 +330,12 @@ void Parser:: parse_default_case()
 	parse_body();
 }
 
+
+void Parser::ParseInput()
+{
+	parse_program();
+	expect(END_OF_FILE);
+}
 
 
 
