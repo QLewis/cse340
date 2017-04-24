@@ -5,6 +5,7 @@
 
 #include <string>
 #include "lexer.h"
+#include "compiler.h"
 
 class Parser{
   private:
@@ -36,7 +37,8 @@ class Parser{
 	struct StatementNode* parse_default_case();
 
  public:
-	void ParseInput();	
+	//void ParseInput();	
+	struct StatementNode* parse_generate_intermediate_representation();
 };
 
 #endif

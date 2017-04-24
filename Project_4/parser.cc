@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "parser.h"
+#include "compiler.h"
 
 using namespace std;
 
@@ -62,6 +63,7 @@ struct StatementNode* Parser::parse_id_list()
 	
 }
 
+//DONE DONE DONE
 struct StatementNode* Parser::parse_body()
 {
 	//body --> LBRACE stmt_list RBRACE
@@ -74,6 +76,7 @@ struct StatementNode* Parser::parse_body()
 	return stl;
 }
 
+//DONE DONE DONE
 struct StatementNode* Parser::parse_stmt_list()
 {
 	struct StatementNode* st; //statement
@@ -82,7 +85,7 @@ struct StatementNode* Parser::parse_stmt_list()
 	st = parse_stmt();
 
 	Token t = peek();
-	if (t.token_type == ID || t.token_type == print || t._token_type == WHILE || t.token_type == IF || t.token_type == SWITCH || t.token_type == FOR)
+	if (t.token_type == ID || t.token_type == PRINT || t.token_type == WHILE || t.token_type == IF || t.token_type == SWITCH || t.token_type == FOR)
 	{
 		//stmt_list --> stmt stmt_list
 		stl = parse_stmt_list();
@@ -102,12 +105,14 @@ struct StatementNode* Parser::parse_stmt_list()
 
 struct StatementNode* Parser::parse_stmt()
 {
+	struct StatementNode* st;
 	Token t = peek();
+
 	if (t.token_type == ID) //stmt --> assign_stmt
 	{
 		parse_assign_stmt();
 	}
-	else if (t.token_type == print) //stmt --> print_stmt
+	else if (t.token_type == PRINT) //stmt --> print_stmt
 	{
 		parse_print_stmt();
 	}
@@ -118,6 +123,15 @@ struct StatementNode* Parser::parse_stmt()
 	else if (t.token_type == IF) //stmt --> if_stmt
 	{
 		parse_if_stmt();
+		//st->type = IF_STMT;
+		//struct IfStatement* ifNode = parse_if_stmt();
+		//st->if_stmt = ifNode;
+		//parse condition
+		//set ifNode->condition_op
+		//set ifNode->condition_operand1
+		//set ifNode->condition_operand2
+		//ifNode->true_branch = parse_body();
+		//create no-op node
 	}
 	else if (t.token_type == SWITCH) //stmt --> switch_stmt
 	{
@@ -207,7 +221,7 @@ struct StatementNode* Parser::parse_op()
 struct StatementNode* Parser::parse_print_stmt()
 {
 	//print_stmt --> print ID SEMICOLON
-	expect(print);
+	expect(PRINT);
 	expect(ID);
 	expect(SEMICOLON);
 }
@@ -222,9 +236,31 @@ struct StatementNode* Parser::parse_while_stmt()
 
 struct StatementNode* Parser::parse_if_stmt()
 {
-	expect(IF);
+	/*expect(IF);
 	parse_condition();
-	parse_body();
+	parse_body();*/
+	struct StatementNode* st;
+	expect(IF);
+	st->type = IF_STMT;
+	struct IfStatement ifNode;
+	st->if_stmt = ifNode;
+	parse_condition();
+	/*ifNode->condition_op;
+	ifNode->condition_operand1;
+	ifNode->conditione_operand2;*/
+	ifNode->true_branch = parse_body();
+	struct StatementNode* noop;
+	noop->type = NOOP_STMT;
+	struct StatmentNode* traverser = ifNode->true_branch;
+	while (traverser->next != NULL)
+	{
+		traverser = traverser->next;
+	}
+	traverser->next = noop;
+	
+	ifNode->false_branch = noop;
+	st->next = noop;
+	
 }
 
 struct StatementNode* Parser::parse_condition()
@@ -260,7 +296,7 @@ struct StatementNode* Parser::parse_switch_stmt()
 	//switch_stmt --> SWITCH ID LBRACE case_list RBRACE
 	//switch_stmt --> SWITCH  ID LBRACE case_list default_case RBRACE
 	expect(SWITCH);
-	expcect(ID);
+	expect(ID);
 	expect(LBRACE);
 	parse_case_list();
 	Token t = peek();
@@ -291,7 +327,6 @@ struct StatementNode* Parser:: parse_for_stmt()
 	expect(RPAREN);
 	parse_body();
 }
-
 
 struct StatementNode* Parser:: parse_case_list()
 {
@@ -331,13 +366,18 @@ struct StatementNode* Parser:: parse_default_case()
 }
 
 
-void Parser::ParseInput()
+/*struct StatementNode* Parser::ParseInput()
 {
-	parse_program();
+	stuct StatementNode* program = parse_program();
 	expect(END_OF_FILE);
+	return program;
+}*/
+
+struct StatementNode* compiler::parse_generate_intermediate_representation()
+{
+	struct StatementNode program = parse_program();
+	return program;
 }
-
-
 
 
 
