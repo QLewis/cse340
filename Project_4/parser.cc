@@ -181,6 +181,7 @@ struct StatementNode* Parser::parse_expr()
 
 struct StatementNode* Parser::parse_primary()
 {
+	//return ValueNode
 	Token t = lexer.GetToken();
 	if (t.token_type == ID || t.token_type == NUM)
 	{
@@ -241,33 +242,46 @@ struct StatementNode* Parser::parse_if_stmt()
 	parse_body();*/
 	struct StatementNode* st;
 	expect(IF);
-	st->type = IF_STMT;
-	struct IfStatement ifNode;
-	st->if_stmt = ifNode;
-	parse_condition();
+	//st->type = IF_STMT;
+	//struct IfStatement ifNode;
+	//st->if_stmt = ifNode;
+	st = parse_condition();
 	/*ifNode->condition_op;
 	ifNode->condition_operand1;
 	ifNode->conditione_operand2;*/
-	ifNode->true_branch = parse_body();
-	struct StatementNode* noop;
+	st->if_stmt->true_branch = parse_body();
+
+	
+	struct StatementNode* noop = new StatementNode();
 	noop->type = NOOP_STMT;
-	struct StatmentNode* traverser = ifNode->true_branch;
+	struct StatmentNode* traverser = st->if_stmt->true_branch;
 	while (traverser->next != NULL)
 	{
 		traverser = traverser->next;
 	}
 	traverser->next = noop;
 	
-	ifNode->false_branch = noop;
+	st->if_stmt->false_branch = noop;
 	st->next = noop;
+
+	return st;
 	
 }
 
 struct StatementNode* Parser::parse_condition()
 {
-	parse_primary();
+	/*parse_primary();
 	parse_relop();
-	parse_primary();
+	parse_primary();*/
+	
+	struct StatementNode* st = new StatementNode();
+	st->type = IF_STMT;
+	st->if_stmt = new IfStatement();
+	st->if_stmt->conditional_operand1 = parse_primary();
+	st->if_stmt->conditional_op = parse_relop();
+	st->if_stmt->conditional_operand2 = parse_primary();
+
+	return st;
 }
 
 struct StatementNode* Parser::parse_relop()
