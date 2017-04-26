@@ -89,7 +89,14 @@ struct StatementNode* Parser::parse_stmt_list()
 	{
 		//stmt_list --> stmt stmt_list
 		stl = parse_stmt_list();
-		st->next = stl;
+		if (st->type == IF_STMT)
+		{
+			st->next->next = stl;
+		}
+		else
+		{
+			st->next = stl;
+		}
 		return st;
 	}
 	else if (t.token_type == RBRACE)
@@ -105,7 +112,7 @@ struct StatementNode* Parser::parse_stmt_list()
 
 struct StatementNode* Parser::parse_stmt()
 {
-	struct StatementNode* st;
+	struct StatementNode* st = new StatementNode();
 	Token t = peek();
 
 	if (t.token_type == ID) //stmt --> assign_stmt
@@ -118,20 +125,13 @@ struct StatementNode* Parser::parse_stmt()
 	}
 	else if (t.token_type == WHILE) //stmt --> while_stmt
 	{
-		parse_while_stmt();
+		st = parse_while_stmt();
+		return st;
 	}
 	else if (t.token_type == IF) //stmt --> if_stmt
 	{
-		parse_if_stmt();
-		//st->type = IF_STMT;
-		//struct IfStatement* ifNode = parse_if_stmt();
-		//st->if_stmt = ifNode;
-		//parse condition
-		//set ifNode->condition_op
-		//set ifNode->condition_operand1
-		//set ifNode->condition_operand2
-		//ifNode->true_branch = parse_body();
-		//create no-op node
+		st = parse_if_stmt();
+		return st;
 	}
 	else if (t.token_type == SWITCH) //stmt --> switch_stmt
 	{
@@ -230,9 +230,35 @@ struct StatementNode* Parser::parse_print_stmt()
 struct StatementNode* Parser::parse_while_stmt()
 {
 	//while_stmt --> WHILE condition body
-	expect(WHILE);
+	/*expect(WHILE);
 	parse_condition();
-	parse_body();
+	parse_body();*/
+	struct StatementNode* st = new StatementNode();
+	expect(WHILE);
+	st->type = IF_STMT;
+	st = parse_condition();
+	st->if_stmt->true_branch = parse_body();
+	
+	struct StatementNode* gt = new StatementNode();
+	gt->type = GOTO_STMT;
+	
+	struct GotoStatement gotoNode = new GotoStatment();
+	gt->goto_stmt = gotoNode;
+
+	gotoNode->target = st;
+
+	struct StatementNode* traverser = st->if_stmt->true_branch;
+	while(traverser->next != NULL)
+	{
+		traverser = traverser->next;
+	}
+	traverser->next = gt;
+
+	struct StatementNode* noop = new StatementNode();
+	noop->type = NOOP_STMT;
+	st->if_stmt->false_branch = noop;
+	st->next = noop;
+	return st;
 }
 
 struct StatementNode* Parser::parse_if_stmt()
@@ -240,15 +266,10 @@ struct StatementNode* Parser::parse_if_stmt()
 	/*expect(IF);
 	parse_condition();
 	parse_body();*/
-	struct StatementNode* st;
+
+	struct StatementNode* st = new StatementNode();
 	expect(IF);
-	//st->type = IF_STMT;
-	//struct IfStatement ifNode;
-	//st->if_stmt = ifNode;
 	st = parse_condition();
-	/*ifNode->condition_op;
-	ifNode->condition_operand1;
-	ifNode->conditione_operand2;*/
 	st->if_stmt->true_branch = parse_body();
 
 	
@@ -395,4 +416,10 @@ struct StatementNode* compiler::parse_generate_intermediate_representation()
 
 
 
-
+//While is almost exact same as if, except next is GOTO
+//set other stuff to noop
+//
+//Create ValueNodes and store them in a struct (linked list)
+//Name set to left side, 
+//
+//parse_primary should get a's and numbers and whatnot
