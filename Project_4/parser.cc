@@ -135,7 +135,8 @@ struct StatementNode* Parser::parse_stmt()
 	}
 	else if (t.token_type == SWITCH) //stmt --> switch_stmt
 	{
-		parse_switch_stmt();
+		st = parse_switch_stmt();
+		return st;
 	}
 	else if (t.token_type == FOR) //stmt --> for_stmt
 	{
@@ -179,14 +180,17 @@ struct StatementNode* Parser::parse_expr()
 	parse_primary();
 }
 
-struct StatementNode* Parser::parse_primary()
+struct ValueNode* Parser::parse_primary()
 {
 	//return ValueNode
+	struct ValueNode* val = new ValueNode();
 	Token t = lexer.GetToken();
 	if (t.token_type == ID || t.token_type == NUM)
 	{
 		//primary --> ID
-		//primary --> NUM
+		//primary --> NUMi
+		val->name = t.lexeme;
+		val->value = t.token_type;
 	}
 	else
 	{
@@ -242,10 +246,12 @@ struct StatementNode* Parser::parse_while_stmt()
 	struct StatementNode* gt = new StatementNode();
 	gt->type = GOTO_STMT;
 	
-	struct GotoStatement gotoNode = new GotoStatment();
-	gt->goto_stmt = gotoNode;
+	struct StatementNode* gotoNode = new StatementNode();
+	gotoNode->type = GOTO_STMT;
+	gotoNode->goto_stmt = new GotoStatement();
+	//gt->goto_stmt = gotoNode;
 
-	gotoNode->target = st;
+	gotoNode->goto_stmt->target = st;
 
 	struct StatementNode* traverser = st->if_stmt->true_branch;
 	while(traverser->next != NULL)
@@ -275,7 +281,7 @@ struct StatementNode* Parser::parse_if_stmt()
 	
 	struct StatementNode* noop = new StatementNode();
 	noop->type = NOOP_STMT;
-	struct StatmentNode* traverser = st->if_stmt->true_branch;
+	struct StatementNode* traverser = st->if_stmt->true_branch;
 	while (traverser->next != NULL)
 	{
 		traverser = traverser->next;
@@ -298,9 +304,9 @@ struct StatementNode* Parser::parse_condition()
 	struct StatementNode* st = new StatementNode();
 	st->type = IF_STMT;
 	st->if_stmt = new IfStatement();
-	st->if_stmt->conditional_operand1 = parse_primary();
-	st->if_stmt->conditional_op = parse_relop();
-	st->if_stmt->conditional_operand2 = parse_primary();
+	st->if_stmt->condition_operand1 = parse_primary();
+	st->if_stmt->condition_op = parse_relop();
+	st->if_stmt->condition_operand2 = parse_primary();
 
 	return st;
 }
@@ -328,9 +334,19 @@ struct StatementNode* Parser::parse_relop()
 
 struct StatementNode* Parser::parse_switch_stmt()
 {
+	//USE A COMBO OF IFSTATEMENT AND GOTOSTATMENT TO SUPPORT THE SEMANTICS OF THE SWITCH STATEMENT
+	
 	//switch_stmt --> SWITCH ID LBRACE case_list RBRACE
 	//switch_stmt --> SWITCH  ID LBRACE case_list default_case RBRACE
+	struct StatementNode* st = new StatementNode();
 	expect(SWITCH);
+	expect(ID);
+	expect(LBRACE);
+	st->type = IF_STMT;
+	st->if_stmt = new IfStatement();
+	st->if_stmt->true_branch = parse_case_list();
+	
+	/*expect(SWITCH);
 	expect(ID);
 	expect(LBRACE);
 	parse_case_list();
@@ -347,7 +363,7 @@ struct StatementNode* Parser::parse_switch_stmt()
 	else
 	{
 		syntax_error();
-	}
+	}*/
 }
 
 struct StatementNode* Parser:: parse_for_stmt()
