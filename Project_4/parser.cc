@@ -23,7 +23,7 @@ Token Parser::expect(TokenType expected_type)
 	{
 		syntax_error();
 	}
-	freturn t;
+	return t;
 }
 
 Token Parser::peek();
@@ -44,6 +44,44 @@ void add(ValueNode* value)
 }
 
 /***********      PARSING     *************/
+
+//parse_program
+//parse_var_Section
+//parse_id_list
+//start_stmt_list
+//
+struct StatementNode* Parser::parse_stmt()
+{
+	struct StatementNode* st = new StatementNode();
+	Token t = peek();
+
+	if (t.token_type == ID)
+	{
+		st = parse_assign_stmt();
+	}
+	else if (t.token_type == PRINT)
+	{
+		st = parse_print_stmt();
+	}
+	else if (t.token_type == WHILE)
+	{
+		st = parse_while_stmt();
+	}
+	else if (t.token_type == IF)
+	{
+		st = parse_if_stmt();
+	}
+	else if (t.token_type == SWITCH)
+	{
+		st = parse_switch_stmt();
+	}
+	else if (t.token_type == FOR)
+	{
+		st = parse_for_stmt();
+	}
+
+	return st;
+}
 
 struct StatementNode* Parser::parse_assign_stmt()
 {
@@ -106,6 +144,9 @@ struct StatementNode* Parser::parse_assign_stmt()
 	return asSt;
 }
 
+
+//parse_expr
+
 struct ValueNode* Parser::parse_primary()
 {
 	struct ValueNode* primary = new ValueNode();
@@ -121,6 +162,24 @@ struct ValueNode* Parser::parse_primary()
 	}
 	add(primary);
 	return primary;
+}
+
+//parse_op
+struct StatementNode* Parser::parse_print_stmt()
+{
+	struct StatementNode* printSt = new StatementNode();
+	printSt->type = PRINT_STMT;
+	printSt->print_stmt = new PrintStatement();
+	
+	struct variableList traverser = variables;
+	while (traverser->next != NULL)
+	{
+		traverser = traverser->next;
+	} 
+
+	printSt->print_stmt->id = traverser->variable;
+
+	return printSt;
 }
 
 
@@ -226,16 +285,95 @@ Token Parser::parse_relop()
 	}
 }
 
-struct StatementNode* compiler::parse_generate_intermediate_representation()
+//parse_switch
+struct StatementNode*::parse_switch_stmt()
 {
-	struct StatementNode input = parse_program();
-	return input;
+	//SWITCH ID LBRACE case_list RBRACE
+	//SWITCH ID LBRACE case_list default_case RBRACE
+	expect(SWITCH);
+	struct StatementNode swiSt = new StatementNode();
+	
+	Token var = expect(ID);
+	struct ValueNode* vari = new ValueNode();
+	vari->name = var.lexeme;
+	vari->value = 0;
+	struct variableList traverser = variables;
+	while(traverser->next != NULL)
+	{
+		traverser = traverser->next;
+	}
+	traverser->next = vari;
+	
+	expect(LBRACE);
+
+	swiSt = parse_case_list();
+	Token t = peek();
+
+	if (t.token_type == DEFAULT)
+	{
+		struct StatementNode defSt = parse_default_case();
+		expect(RBRACE);
+	}
+	else if (t.token_type == RBRACE)
+	{
+		expect(RBRACE);
+	}
+	else
+	{
+		syntax_error();
+	}
+
+	struct StatementNode* noop = new StatementNode();
+	noop->type = NOOP_STMT;
+
+	struct StatementNode* gotonode = new StatementNode();
+	gotoNode->type = GOTO_STMT;
+	gotoNode->goto_stmt = new GotoStatement();
+	gotoNode->goto_stmt->target = noop;
 }
 
 
 
 
 
+struct StatementNode* Parser::parse_for_stmt()
+{
+	//FOR LPAREN assign_stmt condition SEMICOLON assign_stmt RPAREN body
+	expect(FOR);
+	expect(LPAREN);
+	struct StatementNode asSt1 = parse_assign_stmt();
+	// 	MUSH FINISH
+	return asSt1;	
+	
+}
+
+
+struct StatementNode* Parser::parse_case_list()
+{
+	//case case_list
+	//case
+	struct StatementNode* caseSt = parse_case();
+	Token t = peek();
+	if (t.token_type == CASE)
+	{
+		struct StatementNode* caseSt2 = parse_case_list();
+		caseSt->next = caseSt2;
+	}
+	else if (t.token_type === RBRACE || t.token_type == DEFAULT)
+	{
+		//case_list --> case
+	}
+	return caseSt;
+}
+
+struct StatementNode* Parser::parse_case()
+{
+	//case --> CASE NUM COLON body
+	expect(CASE);
+	
+}
+//
+//parse_default_case
 
 
 
@@ -244,5 +382,10 @@ struct StatementNode* compiler::parse_generate_intermediate_representation()
 
 
 
+struct StatementNode* compiler::parse_generate_intermediate_representation()
+{
+	struct StatementNode input = parse_program();
+	return input;
+}
 
 

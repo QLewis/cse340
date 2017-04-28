@@ -26,13 +26,13 @@ class Parser{
 		//------------   NOT DOING ----------------------     parse_expr();
 		struct ValueNode* parse_primary();	//-----------------DONE
 		//parse_op();
-		//print_stmt();
+		struct StatmentNode* print_stmt();	//-----------------DONE
 		struct StatementNode* parse_while_stmt();	//---------DONE
 		struct StatementNode* parse_if_stmt();	//-----------------DONE
 		//parse_condition();
 		Token parse_relop();	//---------------------------------DONE
 		struct StatementNode* parse_switch_stmt();
-		//parse_for_stmt();
+		struct Statement Node* parse_for_stmt();   //------- NEED TO FINISH
 		//parse_case_list();
 		//parse_case();
 		//parse_default_case();
@@ -41,5 +41,5 @@ class Parser{
 struct variableList
 {
 	struct ValueNode* variable;
-	struct ValueNode* next;
+	struct variableList* next;
 }
