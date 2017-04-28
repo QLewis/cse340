@@ -106,8 +106,82 @@ struct StatementNode* Parser::parse_assign_stmt()
 	return asSt;
 }
 
+struct ValueNode* Parser::parse_primary()
+{
+	struct ValueNode* primary = new ValueNode();
+	Token t = lexer.GetToken();
+	if (t.token_type == ID || t.token_type == NUM)
+	{
+		primary->name = t.lexeme;
+		primary->value = 0;
+	}
+	else
+	{
+		syntax_error();
+	}
+	add(primary);
+	return primary;
+}
+
+struct StatementNode* Parser::parse_condition()
+{
+	//values in the locations assoc. w/ operands obtained
+	//relational operator applied to these values
+	//results in a true or false value
+	
+	struct StatementNode condition = new StatementNode();
+	condition->type = IF_STMT;
+	condition->if_stmt = new IfStatement();
+	condition->if_stmt->operand1 = parse_primary();
+	Token t = parse_relop();
+	if (t.token_type == GREATER)
+	{
+		condition->if_stmt->ConditionalOperatorType = CONDITION_GREATER;
+	}
+	else if (t.token_type == LESS)
+	{
+		condition->if_stmt->ConditionalOperatorType = CONDITION_LESS;
+	}
+	else if (t.token_type == NOTEQUAL)
+	{
+		condition->if_stmt->ConditionalOperatorType = CONDITION_NOTEQUAL;
+	}
+
+	condition->if_stmt->operand2 = parse_primary();
+
+	return condition;
+}
+
+Token Parser::parse_relop()
+{
+	Token t = lexer.GetToken();
+	if (t.token_type == GREATER || t.token_type == LESS || t.token_type == NOTEQUAL)
+	{
+		return t;
+	}
+	else
+	{
+		syntax_error();
+	}
+}
+
 struct StatementNode* compiler::parse_generate_intermediate_representation()
 {
 	struct StatementNode input = parse_program();
 	return input;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -22,15 +22,15 @@ class Parser{
 		//struct StatementNode* parse_body();
 		//struct StatementNode* parse_stmt_list();
 		//struct StatementNode* parse_stmt();
-		struct StatementNode* assign_stmt();
-		//parse_expr();
-		struct ValueNode* parse_primary();
+		struct StatementNode* assign_stmt();	//-----------------DONE
+		//------------   NOT DOING ----------------------     parse_expr();
+		struct ValueNode* parse_primary();	//-----------------DONE
 		//parse_op();
 		//print_stmt();
 		struct StatementNode* parse_while_stmt();
 		struct StatementNode* parse_if_stmt();
 		//parse_condition();
-		//parse_relop();
+		Token parse_relop();	//----------------------------------DONE
 		struct StatementNode* parse_switch_stmt();
 		//parse_for_stmt();
 		//parse_case_list();
