@@ -16,12 +16,13 @@ class Parser{
 		Token expect(TokenType expected_type);
 		Token peek();
 	public:
-		//struct StatementNode* parse_program();
-		//parse_var_section();
-		//parse_id_list();
-		//struct StatementNode* parse_body();
-		//struct StatementNode* parse_stmt_list();
-		//struct StatementNode* parse_stmt();
+		void add(struct ValueNode* value);
+		struct StatementNode* parse_program();
+		parse_var_section();
+		parse_id_list();
+		struct StatementNode* parse_body();
+		struct StatementNode* parse_stmt_list();
+		struct StatementNode* parse_stmt();
 		struct StatementNode* assign_stmt();	//-----------------DONE
 		//------------   NOT DOING ----------------------     parse_expr();
 		struct ValueNode* parse_primary();	//-----------------DONE
@@ -29,13 +30,13 @@ class Parser{
 		struct StatmentNode* print_stmt();	//-----------------DONE
 		struct StatementNode* parse_while_stmt();	//---------DONE
 		struct StatementNode* parse_if_stmt();	//-----------------DONE
-		//parse_condition();
+		struct StatementNode* parse_condition();
 		Token parse_relop();	//---------------------------------DONE
 		struct StatementNode* parse_switch_stmt();
-		struct Statement Node* parse_for_stmt();   //------- NEED TO FINISH
-		//parse_case_list();
-		//parse_case();
-		//parse_default_case();
+		struct StatementNode* parse_for_stmt();   //------- NEED TO FINISH
+		struct StatementNode* parse_case_list();
+		struct StatementNode* parse_case();
+		struct StatementNode* parse_default_case();
 };
 
 struct variableList

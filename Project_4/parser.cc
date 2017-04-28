@@ -45,11 +45,75 @@ void add(ValueNode* value)
 
 /***********      PARSING     *************/
 
-//parse_program
-//parse_var_Section
-//parse_id_list
-//start_stmt_list
+struct StatementNode* Parser::parse_program()
+{
+	struct StatementNode* progSt = parse_var_section();
+	progSt->next = parse_body();
+	return progSt;
+}
+
+struct StatementNode* Parser::parse_var_section()
+{
+	struct StatementNode* varSt = parse_id_list();
+	expect(SEMICOLON);
+	return varSt;
+}
+
+struct ValueNode* Parser::parse_id_list()
+{
+	struct ValueNode* value = expect(ID);
+	add(value);
+	Token t = peek();
+	if (t.token_type == COMMA)
+	{
+		expect(COMMA);
+		struct ValueNode* value2 = parse_id_list();
+	}
+	else if (t.token_type == SEMICOLON)
+	{
+		//id_list --> ID
+	}
+	else
+	{
+		syntax_error();
+	}
+	
+}
 //
+struct StatementNode* Parser::parse_body()
+{
+	//LBRACE stmt_list RBRACE
+	expect(LBRACE);
+	struct StatementNode* bodySt = parse_stmt_list();
+	expect(RBRACE);
+
+	return bodySt;
+}
+
+
+struct StatementNode* Parser::parse_stmt_list()
+{
+	//stmt stmt_list
+	//stmt
+	struct stl = parse_stmt();
+
+	Token t = peek();
+	if (t.token_type == ID || t.token_type == PRINT || t.token_type == WHILE || t.token_type = IF || t.token_type === SWITCH || t.token_type == FOR)
+	{
+		struct StatementNode* stl2 = parse_stmt_list();
+		//stl->next = stl2;
+		if (t.token_type === IF || WHILE)
+		{
+			stl->next->next = stl2;
+		}
+		else
+		{
+			stl->next = stl2;
+		}
+	}
+	return stl;
+}
+
 struct StatementNode* Parser::parse_stmt()
 {
 	struct StatementNode* st = new StatementNode();
@@ -352,28 +416,52 @@ struct StatementNode* Parser::parse_case_list()
 {
 	//case case_list
 	//case
-	struct StatementNode* caseSt = parse_case();
+	struct StatementNode* caslSt = parse_case();
 	Token t = peek();
 	if (t.token_type == CASE)
 	{
-		struct StatementNode* caseSt2 = parse_case_list();
-		caseSt->next = caseSt2;
+		struct StatementNode* caslSt2 = parse_case_list();
+		caseSt->next = caslSt2;
 	}
 	else if (t.token_type === RBRACE || t.token_type == DEFAULT)
 	{
 		//case_list --> case
 	}
-	return caseSt;
+	return caslSt;
 }
 
 struct StatementNode* Parser::parse_case()
 {
 	//case --> CASE NUM COLON body
 	expect(CASE);
+	struct StatementNode* caseSt = new StatementNode();
+	caseSt->type = IF_STMT;
+	caseSt->if_stmt = new IfStatement();
+	caseSt->if_stmt->condition_operand1 = expect(NUM);
+
+	struct ValueNode* var =  new ValueNode();
+	variableList* traverser = variables;
+	while (traverser->next != NULL)
+	{
+		traverser = traverser->next;
+	}
+	caseSt->if_stmt->condition_operand2 = traverser;
+	caseSt->if_stmt->condition_op = CONDITION_NOTEQUAL;
+
+	caseSt->if_stmt->true_branch->type = NOOP_STMT;
+	expect(COLON);
+	caseSt->if_stmt->false_branch = parse_body();
 	
+	return caseSt;
 }
 //
-//parse_default_case
+struct StatementNode* Parser::parse_default_case()
+{
+	expect(DEFAULT);
+	expect(COLON);
+	struct StatementNode* defSt = parse_body();
+	return defSt;
+}	
 
 
 
