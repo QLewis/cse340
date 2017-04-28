@@ -41,6 +41,12 @@ class Parser{
 	struct StatementNode* parse_generate_intermediate_representation();
 };
 
+struct varList
+{
+	struct ValueNode* value;
+	struct ValueNode* next;
+}
+
 #endif
 
 

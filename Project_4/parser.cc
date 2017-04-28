@@ -245,13 +245,15 @@ struct StatementNode* Parser::parse_while_stmt()
 	
 	struct StatementNode* gt = new StatementNode();
 	gt->type = GOTO_STMT;
-	
-	struct StatementNode* gotoNode = new StatementNode();
-	gotoNode->type = GOTO_STMT;
-	gotoNode->goto_stmt = new GotoStatement();
+	gt->goto_stmt = new GotoStatement();
+	gt->goto_stmt->target = st;
+
+	//struct StatementNode* gotoNode = new StatementNode();
+	//gotoNode->type = GOTO_STMT;
+	//gotoNode->goto_stmt = new GotoStatement();
 	//gt->goto_stmt = gotoNode;
 
-	gotoNode->goto_stmt->target = st;
+	//gotoNode->goto_stmt->target = st;
 
 	struct StatementNode* traverser = st->if_stmt->true_branch;
 	while(traverser->next != NULL)
@@ -275,7 +277,9 @@ struct StatementNode* Parser::parse_if_stmt()
 
 	struct StatementNode* st = new StatementNode();
 	expect(IF);
+	st->type = IF_STMT;
 	st = parse_condition();
+	st->if_stmt = new IfStatement();
 	st->if_stmt->true_branch = parse_body();
 
 	
@@ -340,11 +344,20 @@ struct StatementNode* Parser::parse_switch_stmt()
 	//switch_stmt --> SWITCH  ID LBRACE case_list default_case RBRACE
 	struct StatementNode* st = new StatementNode();
 	expect(SWITCH);
-	expect(ID);
+
+	Token var = expect(ID);
+	struct ValueNode* variable = new ValueNode();
+	variable->name = var.lexeme;
+	varList->next = variable;
+
 	expect(LBRACE);
-	st->type = IF_STMT;
-	st->if_stmt = new IfStatement();
-	st->if_stmt->true_branch = parse_case_list();
+
+	st = parse_case_list(variable);
+
+
+	//st->type = IF_STMT;
+	//st->if_stmt = new IfStatement();
+	//st->if_stmt->true_branch = parse_case_list();
 	
 	/*expect(SWITCH);
 	expect(ID);
@@ -379,11 +392,21 @@ struct StatementNode* Parser:: parse_for_stmt()
 	parse_body();
 }
 
-struct StatementNode* Parser:: parse_case_list()
+struct StatementNode* Parser:: parse_case_list(struct ValueNode* var)
 {
 	//case_list --> case
 	//case_list --> case case_list
-	parse_case();
+	struct ValueNode* passVar = var;
+	struct StatementNode* st = new StatementNode();
+	struct StatementNode* stl = new StatementNode();
+	Token t = peek();
+
+
+	st = parse_case(passVar);
+	
+	return st;
+
+	/*parse_case();
 	Token t = peek();
 	if (t.token_type == CASE)
 	{
@@ -396,16 +419,29 @@ struct StatementNode* Parser:: parse_case_list()
 	else
 	{
 		syntax_error();
-	}
+	}*/
 }
 
-struct StatementNode* Parser:: parse_case()
+struct StatementNode* Parser:: parse_case(struct ValueNode* var)
 {
 	//case --> CASE NUM COLON body
 	expect(CASE);
+	struct StatementNode* st = new StatementNode();
+	st->type = IF_STMT;
+	st->if_stmt = new IfStatement();
+	st->if_stmt->condition_operand1 = expect(NUM);
+	st->if_stmt->condition_operand2 = var
+	st->if_stm->condition_op = NOTEQUAL
+
+	st->if_stmt->true_branch->type = NOOP
+	expect(COLON);
+	st->if_stmt->false_branch = parse_body();
+	return st;
+
+	/*expect(CASE);
 	expect(NUM);
 	expect(COLON);
-	parse_body();
+	parse_body();*/
 }
 
 struct StatementNode* Parser:: parse_default_case()
@@ -429,7 +465,6 @@ struct StatementNode* compiler::parse_generate_intermediate_representation()
 	struct StatementNode program = parse_program();
 	return program;
 }
-
 
 
 //While is almost exact same as if, except next is GOTO
