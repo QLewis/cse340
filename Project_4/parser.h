@@ -27,10 +27,10 @@ class Parser{
 		struct ValueNode* parse_primary();	//-----------------DONE
 		//parse_op();
 		//print_stmt();
-		struct StatementNode* parse_while_stmt();
-		struct StatementNode* parse_if_stmt();
+		struct StatementNode* parse_while_stmt();	//---------DONE
+		struct StatementNode* parse_if_stmt();	//-----------------DONE
 		//parse_condition();
-		Token parse_relop();	//----------------------------------DONE
+		Token parse_relop();	//---------------------------------DONE
 		struct StatementNode* parse_switch_stmt();
 		//parse_for_stmt();
 		//parse_case_list();

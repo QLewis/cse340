@@ -123,6 +123,65 @@ struct ValueNode* Parser::parse_primary()
 	return primary;
 }
 
+
+struct StatementNode* Parser::parse_while_stmt()
+{
+	//while_stmt --> WHILE condition body
+	expect(WHILE);
+
+	struct StatementNode* whileSt = parse_condition();
+	whileSt->if_stmt->true_branch = parse_body();
+	
+	struct StatementNode* gotoNode = new StatementNode();
+	gotoNode->type = GOTO_STMT;
+	gotoNode->goto_stmt = new GotoStatement();
+	gotoNode->goto_stmt->target = whileSt;
+
+	struct StatementNode* traverser = whileSt->if_stmt->true_branch;
+	while (traverser->next != NULL)
+	{
+		traverser = traverser->next;
+	}
+	traverser->next = gotoNode;
+
+
+	struct StatementNode* noop = new StatementNode();
+	noop->type = NOOP_STMT;
+
+	whileSt->if_stmt->false_branch = noop;
+	whileSt->next = noop;
+
+	return whileSt;
+}
+
+
+
+
+
+struct StatementNode* Parser::parse_if_stmt()
+{
+	//if_stmt --> IF condition body
+	expect(IF);
+	struct StatementNode* ifSt = parse_condition();
+
+	ifSt->if_stmt->true_branch = parse_body();
+
+	struct StatementNode* noop = new StatementNode();
+	noop->type = NOOP_STMT;
+
+	ifSt->if_stmt->false_branch = noop;
+
+	struct StatementNode* traverser = ifSt->if_stmt->true_branch;
+	while(traverser->next != NULL)
+	{
+		traverser = traverser->next;
+	}
+	traverser->next = noop;
+
+	return ifSt;
+}
+
+
 struct StatementNode* Parser::parse_condition()
 {
 	//values in the locations assoc. w/ operands obtained
@@ -148,6 +207,8 @@ struct StatementNode* Parser::parse_condition()
 	}
 
 	condition->if_stmt->operand2 = parse_primary();
+	condition->if_stmt->true_branch = NULL;
+	condition->if_stmt->false_branch = NULL;
 
 	return condition;
 }
