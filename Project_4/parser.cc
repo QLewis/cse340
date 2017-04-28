@@ -8,7 +8,7 @@
 
 using namespace std;
 
-struct variableList variables = NULL; //global list of variables
+struct variableList* variables = NULL; //global list of variables
 
 void Parser::syntax_error()
 {
@@ -26,14 +26,14 @@ Token Parser::expect(TokenType expected_type)
 	return t;
 }
 
-Token Parser::peek();
+Token Parser::peek()
 {
 	Token t = lexer.GetToken();
 	lexer.UngetToken(t);
 	return t;
 }
 
-void add(ValueNode* value)
+void Parser::add(struct ValueNode* value)
 {
 	struct variableList* traverser = variables;
 	while(traverser->next != NULL)
@@ -47,21 +47,30 @@ void add(ValueNode* value)
 
 struct StatementNode* Parser::parse_program()
 {
-	struct StatementNode* progSt = parse_var_section();
+	/*struct StatementNode* progSt = parse_var_section();
 	progSt->next = parse_body();
+	return progSt;*/
+
+	struct ValueNode* valueNode = parse_var_section();
+	struct StatementNode* progSt = parse_body();
 	return progSt;
 }
 
-struct StatementNode* Parser::parse_var_section()
+struct ValueNode* Parser::parse_var_section()
 {
-	struct StatementNode* varSt = parse_id_list();
+	struct ValueNode* varSt = parse_id_list();
 	expect(SEMICOLON);
 	return varSt;
 }
 
 struct ValueNode* Parser::parse_id_list()
 {
-	struct ValueNode* value = expect(ID);
+	//struct ValueNode* value = expect(ID);
+	Token id = expect(ID);
+	struct ValueNode* value = new ValueNode();
+	value->name = id.lexeme;
+	value->value = 0;
+
 	add(value);
 	Token t = peek();
 	if (t.token_type == COMMA)
@@ -79,7 +88,7 @@ struct ValueNode* Parser::parse_id_list()
 	}
 	
 }
-//
+
 struct StatementNode* Parser::parse_body()
 {
 	//LBRACE stmt_list RBRACE
@@ -95,14 +104,17 @@ struct StatementNode* Parser::parse_stmt_list()
 {
 	//stmt stmt_list
 	//stmt
-	struct stl = parse_stmt();
+	//struct stl = parse_stmt();
+	struct StatementNode* stl = new StatementNode();
+	stl = parse_stmt();
 
 	Token t = peek();
-	if (t.token_type == ID || t.token_type == PRINT || t.token_type == WHILE || t.token_type = IF || t.token_type === SWITCH || t.token_type == FOR)
+	if (t.token_type == ID || t.token_type == PRINT || t.token_type == WHILE || t.token_type == IF || t.token_type == SWITCH || t.token_type == FOR)
 	{
-		struct StatementNode* stl2 = parse_stmt_list();
+		struct StatementNode* stl2 = new StatementNode();
+		stl2 = parse_stmt_list();
 		//stl->next = stl2;
-		if (t.token_type === IF || WHILE)
+		if (t.token_type == IF || WHILE)
 		{
 			stl->next->next = stl2;
 		}
@@ -154,7 +166,7 @@ struct StatementNode* Parser::parse_assign_stmt()
 	// assign_stmt->ID EQUAL primary SEMICOLON
 	// assign_stmt->ID EQUAL expr SEMICOLON
 	
-	struct StatementNode asSt = new StatementNode();
+	struct StatementNode* asSt = new StatementNode();
 	asSt->type = ASSIGN_STMT;
 	asSt->assign_stmt = new AssignmentStatement();
 
@@ -231,11 +243,11 @@ struct ValueNode* Parser::parse_primary()
 //parse_op
 struct StatementNode* Parser::parse_print_stmt()
 {
-	struct StatementNode* printSt = new StatementNode();
+	/*struct StatementNode* printSt = new StatementNode();
 	printSt->type = PRINT_STMT;
 	printSt->print_stmt = new PrintStatement();
 	
-	struct variableList traverser = variables;
+	struct variableList* traverser = variables;
 	while (traverser->next != NULL)
 	{
 		traverser = traverser->next;
@@ -243,7 +255,31 @@ struct StatementNode* Parser::parse_print_stmt()
 
 	printSt->print_stmt->id = traverser->variable;
 
-	return printSt;
+	return printSt;*/
+
+	expect(PRINT);
+	struct StatementNode* printSt = new StatementNode();
+	printSt->type = PRINT_STMT;
+	printSt->print_stmt = new PrintStatement();
+
+	Token id = expect(ID);
+	expect(SEMICOLON);
+	std::string name = id.lexeme;
+
+	struct variableList*traverser = variables;
+	while (traverser->next != NULL)
+	{
+		if (traverser->variable->name == id.lexeme)
+		{
+			printSt->print_stmt->id = traverser->variable;
+		}
+		traverser = traverser->next;
+	}
+	//expect print
+	//expect id
+	//expect semicolon
+	//compare id with items in list
+	//point print->id to valueNode in variable list
 }
 
 
@@ -311,63 +347,62 @@ struct StatementNode* Parser::parse_condition()
 	//relational operator applied to these values
 	//results in a true or false value
 	
-	struct StatementNode condition = new StatementNode();
+	struct StatementNode* condition = new StatementNode();
 	condition->type = IF_STMT;
 	condition->if_stmt = new IfStatement();
-	condition->if_stmt->operand1 = parse_primary();
-	Token t = parse_relop();
-	if (t.token_type == GREATER)
-	{
-		condition->if_stmt->ConditionalOperatorType = CONDITION_GREATER;
-	}
-	else if (t.token_type == LESS)
-	{
-		condition->if_stmt->ConditionalOperatorType = CONDITION_LESS;
-	}
-	else if (t.token_type == NOTEQUAL)
-	{
-		condition->if_stmt->ConditionalOperatorType = CONDITION_NOTEQUAL;
-	}
+	condition->if_stmt->condition_operand1 = parse_primary();
+	condition->if_stmt->condition_op = parse_relop();
 
-	condition->if_stmt->operand2 = parse_primary();
-	condition->if_stmt->true_branch = NULL;
-	condition->if_stmt->false_branch = NULL;
+	condition->if_stmt->condition_operand2 = parse_primary();
 
 	return condition;
 }
 
-Token Parser::parse_relop()
+ConditionalOperatorType Parser::parse_relop()
 {
 	Token t = lexer.GetToken();
-	if (t.token_type == GREATER || t.token_type == LESS || t.token_type == NOTEQUAL)
+	if (t.token_type == GREATER)
+        {
+                return CONDITION_GREATER;
+        }
+        else if (t.token_type == LESS)
+        {
+                return CONDITION_LESS;
+        }
+        else if (t.token_type == NOTEQUAL)
+        {
+                return CONDITION_NOTEQUAL;
+        }
+
+	/*if (t.token_type == GREATER || t.token_type == LESS || t.token_type == NOTEQUAL)
 	{
 		return t;
 	}
 	else
 	{
 		syntax_error();
-	}
+	}*/
 }
 
 //parse_switch
-struct StatementNode*::parse_switch_stmt()
+struct StatementNode* Parser::parse_switch_stmt()
 {
 	//SWITCH ID LBRACE case_list RBRACE
 	//SWITCH ID LBRACE case_list default_case RBRACE
 	expect(SWITCH);
-	struct StatementNode swiSt = new StatementNode();
+	struct StatementNode* swiSt = new StatementNode();
 	
 	Token var = expect(ID);
 	struct ValueNode* vari = new ValueNode();
 	vari->name = var.lexeme;
 	vari->value = 0;
-	struct variableList traverser = variables;
+	/*struct variableList* traverser = variables;
 	while(traverser->next != NULL)
 	{
 		traverser = traverser->next;
 	}
-	traverser->next = vari;
-	
+	traverser->next->variable = vari;*/
+	add(vari);
 	expect(LBRACE);
 
 	swiSt = parse_case_list();
@@ -375,7 +410,7 @@ struct StatementNode*::parse_switch_stmt()
 
 	if (t.token_type == DEFAULT)
 	{
-		struct StatementNode defSt = parse_default_case();
+		struct StatementNode* defSt = parse_default_case();
 		expect(RBRACE);
 	}
 	else if (t.token_type == RBRACE)
@@ -390,7 +425,7 @@ struct StatementNode*::parse_switch_stmt()
 	struct StatementNode* noop = new StatementNode();
 	noop->type = NOOP_STMT;
 
-	struct StatementNode* gotonode = new StatementNode();
+	struct StatementNode* gotoNode = new StatementNode();
 	gotoNode->type = GOTO_STMT;
 	gotoNode->goto_stmt = new GotoStatement();
 	gotoNode->goto_stmt->target = noop;
@@ -405,7 +440,7 @@ struct StatementNode* Parser::parse_for_stmt()
 	//FOR LPAREN assign_stmt condition SEMICOLON assign_stmt RPAREN body
 	expect(FOR);
 	expect(LPAREN);
-	struct StatementNode asSt1 = parse_assign_stmt();
+	struct StatementNode* asSt1 = parse_assign_stmt();
 	// 	MUSH FINISH
 	return asSt1;	
 	
@@ -421,9 +456,9 @@ struct StatementNode* Parser::parse_case_list()
 	if (t.token_type == CASE)
 	{
 		struct StatementNode* caslSt2 = parse_case_list();
-		caseSt->next = caslSt2;
+		caslSt->next = caslSt2;
 	}
-	else if (t.token_type === RBRACE || t.token_type == DEFAULT)
+	else if (t.token_type == RBRACE || t.token_type == DEFAULT)
 	{
 		//case_list --> case
 	}
@@ -437,7 +472,10 @@ struct StatementNode* Parser::parse_case()
 	struct StatementNode* caseSt = new StatementNode();
 	caseSt->type = IF_STMT;
 	caseSt->if_stmt = new IfStatement();
-	caseSt->if_stmt->condition_operand1 = expect(NUM);
+	Token id = expect(NUM);
+	struct ValueNode* compare = new ValueNode();
+	compare->name = id.lexeme;
+	caseSt->if_stmt->condition_operand1 = compare;
 
 	struct ValueNode* var =  new ValueNode();
 	variableList* traverser = variables;
@@ -445,7 +483,7 @@ struct StatementNode* Parser::parse_case()
 	{
 		traverser = traverser->next;
 	}
-	caseSt->if_stmt->condition_operand2 = traverser;
+	caseSt->if_stmt->condition_operand2 = traverser->variable;
 	caseSt->if_stmt->condition_op = CONDITION_NOTEQUAL;
 
 	caseSt->if_stmt->true_branch->type = NOOP_STMT;
@@ -463,16 +501,10 @@ struct StatementNode* Parser::parse_default_case()
 	return defSt;
 }	
 
-
-
-
-
-
-
-
-struct StatementNode* compiler::parse_generate_intermediate_representation()
+struct StatementNode* parse_generate_intermediate_representation()
 {
-	struct StatementNode input = parse_program();
+	Parser parser;
+	struct StatementNode* input = parser.parse_program();
 	return input;
 }
 
