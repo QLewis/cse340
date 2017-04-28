@@ -16,6 +16,30 @@ class Parser{
 		Token expect(TokenType expected_type);
 		Token peek();
 	public:
-		//struct StatementNode* parse_generate_intermediate_representation();
-
+		//struct StatementNode* parse_program();
+		//parse_var_section();
+		//parse_id_list();
+		//struct StatementNode* parse_body();
+		//struct StatementNode* parse_stmt_list();
+		//struct StatementNode* parse_stmt();
+		struct StatementNode* assign_stmt();
+		//parse_expr();
+		struct ValueNode* parse_primary();
+		//parse_op();
+		//print_stmt();
+		struct StatementNode* parse_while_stmt();
+		struct StatementNode* parse_if_stmt();
+		//parse_condition();
+		//parse_relop();
+		struct StatementNode* parse_switch_stmt();
+		//parse_for_stmt();
+		//parse_case_list();
+		//parse_case();
+		//parse_default_case();
 };
+
+struct variableList
+{
+	struct ValueNode* variable;
+	struct ValueNode* next;
+}
