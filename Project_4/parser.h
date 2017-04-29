@@ -7,7 +7,6 @@
 #include "lexer.h"
 #include "compiler.h"
 
-
 class Parser{
 	private:
 		LexicalAnalyzer lexer;
@@ -15,7 +14,7 @@ class Parser{
 		void syntax_error();
 		Token expect(TokenType expected_type);
 		Token peek();
-		struct ValueNode* parse_var_section();
+		void parse_var_section();
 		struct ValueNode* parse_id_list();
 		struct StatementNode* parse_body();
 		struct StatementNode* parse_stmt_list();
@@ -23,7 +22,7 @@ class Parser{
 		struct StatementNode* parse_assign_stmt();	//-----------------DONE
 		//------------   NOT DOING ----------------------     parse_expr();
 		struct ValueNode* parse_primary();	//-----------------DONE
-		//parse_op();
+		ArithmeticOperatorType parse_op();
 		struct StatementNode* parse_print_stmt();	//-----------------DONE
 		struct StatementNode* parse_while_stmt();	//---------DONE
 		struct StatementNode* parse_if_stmt();	//-----------------DONE

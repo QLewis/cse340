@@ -34,13 +34,30 @@ Token Parser::peek()
 }
 
 void Parser::add(struct ValueNode* value)
-{
-	struct variableList* traverser = variables;
-	while(traverser->next != NULL)
+{	
+	/*
+ * 	If variables is NULL, next item = variables
+ * 	Else traverser to end, then add next item
+ * 	*/
+	if (variables == NULL)
 	{
-		traverser = traverser->next;
+		variables->variable = value;
 	}
-	traverser->next->variable = value;
+	else
+	{
+		struct variableList* traverser = variables;
+		while (traverser->next != NULL)
+		{
+			traverser = traverser->next;
+		}
+		traverser->next->variable = value;
+	}
+//	struct variableList* traverser = variables;
+//	while(traverser->next != NULL)
+//	{
+//		traverser = traverser->next;
+//	}
+//	traverser->next->variable = value;
 }
 
 /***********      PARSING     *************/
@@ -51,25 +68,25 @@ struct StatementNode* Parser::parse_program()
 	progSt->next = parse_body();
 	return progSt;*/
 
-	struct ValueNode* valueNode = parse_var_section();
+	parse_var_section();
 	struct StatementNode* progSt = parse_body();
 	return progSt;
 }
 
-struct ValueNode* Parser::parse_var_section()
+void Parser::parse_var_section()
 {
-	struct ValueNode* varSt = parse_id_list();
+	parse_id_list();
 	expect(SEMICOLON);
-	return varSt;
 }
 
 struct ValueNode* Parser::parse_id_list()
 {
 	//struct ValueNode* value = expect(ID);
-	Token id = expect(ID);
+	//Token id = expect(ID);
+	Token id = lexer.GetToken();
 	struct ValueNode* value = new ValueNode();
 	value->name = id.lexeme;
-	value->value = 0;
+	//value->value = 0;
 
 	add(value);
 	Token t = peek();
@@ -86,7 +103,6 @@ struct ValueNode* Parser::parse_id_list()
 	{
 		syntax_error();
 	}
-	
 }
 
 struct StatementNode* Parser::parse_body()
@@ -173,7 +189,7 @@ struct StatementNode* Parser::parse_assign_stmt()
 	Token id = expect(ID);
 	asSt->assign_stmt->left_hand_side = new ValueNode();
 	asSt->assign_stmt->left_hand_side->name = id.lexeme;
-	asSt->assign_stmt->left_hand_side->value = 0;
+	//asSt->assign_stmt->left_hand_side->value = 0;
 
 	add(asSt->assign_stmt->left_hand_side);	//add new ValueNode to variable list
 
@@ -182,20 +198,25 @@ struct StatementNode* Parser::parse_assign_stmt()
 	Token t2 = peek();
 	if(t2.token_type == SEMICOLON) // assign_stmt --> ID EQUAL primary SEMICOLON
 	{
+		//asSt->assign_stmt->op = parse_op();
 		asSt->assign_stmt->op = OPERATOR_NONE;
 		asSt->assign_stmt->operand2 = NULL;
+		/*if (asSt->assign_stmt->op == OPERATOR_NONE)
+		{
+			asSt->assign_stmt->operand2 = NULL;
+		}*/
 		lexer.UngetToken(t1);
 		asSt->assign_stmt->operand1 = parse_primary();
 		add(asSt->assign_stmt->operand1);
 		expect(SEMICOLON);
 	}
-	else if (t2.token_type == PLUS || t2.token_type == MINUS || t2.token_type == MULT || t2.token_type == DIV) //assign_stmt --> ID EQUAL primary SEMICOLON
+	else if (t2.token_type == PLUS || t2.token_type == MINUS || t2.token_type == MULT || t2.token_type == DIV) //assign_stmt --> ID EQUAL expr SEMICOLON
 	{
 		lexer.UngetToken(t1);
 		asSt->assign_stmt->operand1 = parse_primary();
 		add(asSt->assign_stmt->operand1);
-
-		if (t2.token_type == PLUS)
+		asSt->assign_stmt->op = parse_op();
+		/*if (t2.token_type == PLUS)
 		{
 			asSt->assign_stmt->op = OPERATOR_PLUS;
 		}
@@ -210,7 +231,7 @@ struct StatementNode* Parser::parse_assign_stmt()
 		else if (t2.token_type == DIV)
 		{
 			asSt->assign_stmt->op = OPERATOR_DIV;
-		}
+		}*/
 
 		asSt->assign_stmt->operand2 = parse_primary();
 		add(asSt->assign_stmt->operand2);
@@ -230,7 +251,7 @@ struct ValueNode* Parser::parse_primary()
 	if (t.token_type == ID || t.token_type == NUM)
 	{
 		primary->name = t.lexeme;
-		primary->value = 0;
+		//primary->value = 0;
 	}
 	else
 	{
@@ -240,7 +261,31 @@ struct ValueNode* Parser::parse_primary()
 	return primary;
 }
 
-//parse_op
+ArithmeticOperatorType Parser::parse_op()
+{
+	Token t = lexer.GetToken();
+	//Token t = lexer.GetToken();
+	if (t.token_type == PLUS)
+	{
+		return OPERATOR_PLUS;
+	}
+	else if (t.token_type == MINUS)
+	{
+		return OPERATOR_MINUS;
+	}
+	else if (t.token_type == MULT)
+	{
+		return OPERATOR_MULT;
+	}
+	else if (t.token_type == DIV)
+	{
+		return OPERATOR_DIV;
+	}
+	else
+	{
+		return OPERATOR_NONE;
+	}
+}
 struct StatementNode* Parser::parse_print_stmt()
 {
 	/*struct StatementNode* printSt = new StatementNode();
@@ -287,8 +332,9 @@ struct StatementNode* Parser::parse_while_stmt()
 {
 	//while_stmt --> WHILE condition body
 	expect(WHILE);
-
-	struct StatementNode* whileSt = parse_condition();
+	struct StatementNode* whileSt = new StatementNode();
+	//whileSt->type = new IfStatement();
+	whileSt = parse_condition();
 	whileSt->if_stmt->true_branch = parse_body();
 	
 	struct StatementNode* gotoNode = new StatementNode();
@@ -441,8 +487,21 @@ struct StatementNode* Parser::parse_for_stmt()
 	expect(FOR);
 	expect(LPAREN);
 	struct StatementNode* asSt1 = parse_assign_stmt();
-	// 	MUSH FINISH
-	return asSt1;	
+	struct StatementNode* condition = parse_condition();
+	asSt1->next = condition;
+	expect(SEMICOLON);
+	struct StatementNode* asSt2 = parse_assign_stmt();
+	condition->next = asSt2;
+	expect(RPAREN);
+	struct StatementNode* boSt = parse_body();
+	asSt2->next = boSt;
+	
+	struct StatementNode* noop = new StatementNode();
+	noop->type = NOOP_STMT;
+
+	boSt->next = noop;
+
+	return asSt1;
 	
 }
 
@@ -503,7 +562,7 @@ struct StatementNode* Parser::parse_default_case()
 
 struct StatementNode* parse_generate_intermediate_representation()
 {
-	Parser parser;
+	Parser parser; //create a parser object
 	struct StatementNode* input = parser.parse_program();
 	return input;
 }
